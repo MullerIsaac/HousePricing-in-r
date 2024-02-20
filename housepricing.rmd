@@ -1,0 +1,152 @@
+---
+title: "House Pricing Data Analysis"
+author: "Isaac Müller"
+output:
+  pdf_document: default
+  html_notebook:
+    theme:
+      bootswatch: cosmo
+---
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(scales)
+if(!require(rstatix)) install.packages("rstatix")
+library(rstatix)
+if(!require(rstatix)) install.packages("ggplot2")
+library(ggplot2)
+```
+
+
+```{r}
+housepricing = read.csv2('train.csv', sep=',')
+View(housepricing)
+```
+
+```{r}
+
+## Conversão de medidas para metros quadrados
+
+conversion_factor = 0.092903
+
+housepricing$GrLivArea <- housepricing$GrLivArea * conversion_factor
+housepricing$LotArea <- housepricing$LotArea * conversion_factor
+
+```
+
+```{r}
+##verificando valores faltantes
+
+sapply(housepricing, function(x) sum(is.na(x)))
+```
+
+```{r}
+sapply(housepricing, function(x) sum(is.nan(x)))
+```
+```{r}
+ggplot(housepricing, aes(x = SalePrice)) +
+  geom_histogram(fill = "lightblue", color = "blue") +
+  labs(y = "Preço de Venda", title = "Distribuição de Preços de Venda das Casas") +
+  theme_minimal()+
+  scale_x_continuous(labels = scales::dollar_format())
+```
+
+
+```{r}
+ggplot(housepricing, aes(x= GrLivArea, y= SalePrice)) +
+  geom_point(colour="DarkBlue") +
+  labs(x = "Area Habitável (m²)", y= "Preco de Venda", title="Relação entre área habitável e preço de venda") +
+  geom_smooth(method = "lm", se = FALSE, color = "red")+
+  scale_y_continuous(labels=scales::dollar_format())
+```
+```{r}
+ggplot(housepricing, aes(x=factor(BedroomAbvGr), y=SalePrice))+
+  geom_point(color = "blue", alpha=0.5)+
+  labs(title="Relação entre quantidade de quartos e preço de venda", x="Quantidade de Quartos", y="Valor de venda da casa")+
+  scale_y_continuous(labels = scales::dollar_format())
+  
+```
+```{r}
+ggplot(housepricing, aes(x= GrLivArea, y= SalePrice)) +
+  geom_point(colour="DarkBlue") +
+  labs(x = "Area Habitável (m²)", y= "Preco de Venda", title="Relação entre área habitável e preço de venda com base nos quartos") +
+  geom_smooth(method = "lm", se = FALSE, color = "red")+
+  facet_grid(.~BedroomAbvGr, scales="free")+
+  scale_y_continuous(labels=scales::dollar_format())+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+```{r}
+
+## Muitos Outliers nas ruas pavimentadas, provavelmente há uma inflação muito alta
+ggplot(housepricing, aes(x = Street, y = SalePrice)) +
+  geom_boxplot(fill = "lightblue", color = "blue") +
+  labs(x = "Tipo de Rua", y = "Preço de Venda", title = "Distribuição de Preços por tipo de rua") +
+  theme_minimal() +
+  scale_y_continuous(labels= scales::comma)
+```
+```{r}
+## Analisando o preço pela qualidade geral do imóvel
+
+ggplot(housepricing, aes(x=factor(OverallQual), y=SalePrice))+
+  geom_bar(stat="summary", fun="mean", fill="lightblue", color="red")+
+  geom_smooth(aes(group = 1), method = "loess", se = FALSE, color = "red", linetype = "dashed") +
+  labs(x="Qualidade geral do imóvel", y="Preço médio de venda", title="Preço médio de venda por qualidade geral do imóvel")+
+  scale_y_continuous(labels=scales::dollar_format())
+
+## Percebe-se um aumento no preço conforme a qualidade do imóvel for aumentando
+```
+
+```{r}
+#A condição geral do imóvel não influencia muito no preço
+ggplot(housepricing, aes(x=factor(OverallCond), y=SalePrice))+
+  geom_bar(stat="summary", fun="mean", fill="lightblue", color="red")+
+  labs(x="Qualidade geral do imóvel", y="Preço médio de venda", title="Preço médio de venda por qualidade geral do imóvel")+
+  scale_y_continuous(labels=scales::dollar_format())
+
+```
+
+
+```{r}
+#Analisando se a idade do imóvel influencia no preço dele
+ggplot(housepricing, aes(x=YearBuilt, y=SalePrice))+
+  geom_point(colour="darkred")+
+  geom_smooth(method = "lm", se=FALSE, color="blue")+
+  labs(x="Ano de construção do Imóvel", y="Preço de Venda", title="Preço de venda pelo ano de construção do imóvel")+
+  scale_y_continuous(labels=scales::dollar_format())
+```
+
+
+```{r}
+##Ness gráfico vemos que não há uma correlação tão forte entre ano de construção e preço de venda
+ggplot(housepricing, aes(x=YearBuilt, y=SalePrice))+
+  geom_point(stat="summary", fun="mean", color="darkred")+
+  geom_smooth(aes(group = 1), method = "loess", se = FALSE, color = "red", linetype = "dashed")+
+  labs(x="Ano de construção do Imóvel", y="Preço de Venda", title="Preço de venda pelo ano de construção do imóvel")+
+  scale_y_continuous(labels=scales::dollar_format())+
+  theme_bw()
+```
+
+
+```{r}
+ggplot(housepricing, aes(x=YearRemodAdd, y=SalePrice))+
+  geom_point(colour="darkred")+
+  geom_smooth(method = "lm", se=FALSE, color="blue")+
+  labs(x="Ano da última reforma", y="Preço de Venda", title="Preço de venda pelo ano da última reforma")+
+  scale_y_continuous(labels=scales::dollar_format())
+
+```
+
+
+```{r}
+
+## Aqui percebemos uma correlação mais forte
+ggplot(housepricing, aes(x=YearRemodAdd, y=SalePrice))+
+  geom_point(stat="summary", fun="mean", color="darkred")+
+  geom_smooth(aes(group = 1), method = "loess", se = FALSE, color = "red", linetype = "dashed")+
+  labs(x="Ano de última reforma", y="Preço médio de Venda", title="Preço médio de venda pelo ano da última reforma")+
+  scale_y_continuous(labels=scales::dollar_format())
+```
+
