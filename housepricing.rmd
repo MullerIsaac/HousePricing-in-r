@@ -47,7 +47,7 @@ sapply(housepricing, function(x) sum(is.nan(x)))
 ```
 ```{r}
 ggplot(housepricing, aes(x = SalePrice)) +
-  geom_histogram(fill = "lightblue", color = "blue") +
+  geom_histogram(bins=25, fill = "lightblue", color = "blue") +
   labs(y = "Preço de Venda", title = "Distribuição de Preços de Venda das Casas") +
   theme_minimal()+
   scale_x_continuous(labels = scales::dollar_format())
@@ -77,6 +77,16 @@ ggplot(housepricing, aes(x= GrLivArea, y= SalePrice)) +
   scale_y_continuous(labels=scales::dollar_format())+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+```{r}
+ggplot(housepricing, aes(x = GrLivArea, y = SalePrice, color = factor(OverallQual))) +
+  geom_point() +
+  scale_color_manual(values = c("1" = "blue", "2" = "green", "3" = "orange", 
+                                 "4" = "red", "5" = "purple", "6" = "brown", 
+                                 "7" = "pink", "8" = "gray", "9" = "yellow", "10" = "cyan")) +
+  labs(x = "Área Habitável (m²)", y = "Preço de Venda", 
+       title = "Relação entre Área Habitável, Preço de Venda e Qualidade Geral") +
+  theme_minimal()
+```
 
 ```{r}
 
@@ -85,7 +95,7 @@ ggplot(housepricing, aes(x = Street, y = SalePrice)) +
   geom_boxplot(fill = "lightblue", color = "blue") +
   labs(x = "Tipo de Rua", y = "Preço de Venda", title = "Distribuição de Preços por tipo de rua") +
   theme_minimal() +
-  scale_y_continuous(labels= scales::comma)
+  scale_y_continuous(labels= scales::dollar_format())
 ```
 ```{r}
 ## Analisando o preço pela qualidade geral do imóvel
