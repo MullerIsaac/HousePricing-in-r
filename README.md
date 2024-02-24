@@ -17,7 +17,7 @@ O objetivo deste projeto é explorar um conjunto de dados de vendas de casas e r
 
 Para reproduzir a análise, é necessário ter o software R instalado em seu sistema. Além disso, é necessário instalar as bibliotecas ggplot2 e scales. Você pode instalá-las executando o seguinte comando no R:
 
-install.packages("ggplot2")
+install.packages("ggplot2")\
 install.packages("scales")
 
 
